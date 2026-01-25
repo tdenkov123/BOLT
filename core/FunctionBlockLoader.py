@@ -37,9 +37,7 @@ class FunctionBlockLoader:
             return module_path, class_name
         return fb_ref, None
 
-    def _collect_classes(
-        self, module, explicit_class: str | None
-    ) -> Dict[str, Type[BaseFB]]:
+    def _collect_classes(self, module, explicit_class: str | None) -> Dict[str, Type[BaseFB]]:
         def is_fb(candidate: object) -> bool:
             return isinstance(candidate, type) and issubclass(candidate, BaseFB) and candidate is not BaseFB
 

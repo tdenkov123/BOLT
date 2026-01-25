@@ -1,18 +1,27 @@
 import asyncio
 
 from core.FunctionBlockLoader import FunctionBlockLoader
+from core.device.BaseDevice import BaseDevice
+from core.resource.BaseResource import BaseResource
 
 
 async def main() -> None:
     loader = FunctionBlockLoader()
-    fb_classes = loader.loadFBList(["core.FBs.INT2INT", "core.FBs.ADD_2"])
+    fb_classes = loader.loadFBList(["core.FBs.ADD_2"])
 
-    example_fb = fb_classes["INT2INT"]("ExampleFB")
-    result = example_fb.execute(5)
-    print(f"INT2INT execute result: {result}")
+    dev = BaseDevice("dev1")
+    res = BaseResource("res1")
+    dev.add_resource(res)
 
-    a = fb_classes["INT2INT"]("FB1")
-    b = fb_classes["ADD_2"]("FB2")
+    adder = fb_classes["ADD_2"]("adder")
+    res.add_fb(adder)
+
+    current = 0
+    while True:
+        current = adder.execute(current, 1)
+        print(f"adder result: {current}")
+        await asyncio.sleep(0.5)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

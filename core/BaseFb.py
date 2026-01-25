@@ -10,11 +10,5 @@ class BaseFB:
     def get_output(self, name: str):
         return self._outputs.get(name)
 
-    def execute(self):
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    def getEventOutputs(self):
-        raise NotImplementedError("Subclasses should implement this method.")
-
-    def getEventInputs(self):
+    async def execute(self, event: str):
         raise NotImplementedError("Subclasses should implement this method.")

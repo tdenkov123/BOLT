@@ -26,8 +26,11 @@ class BaseResource:
     def connect_event(self, src_fb: str, src_event: str, dst_fb: str, dst_event: str = "REQ") -> None:
         self._broker.add_event_connection(src_fb, src_event, dst_fb, dst_event)
 
-    def connect_data(self, src_fb: str, src_output: str, dst_fb: str, dst_input: str) -> None:
-        self._broker.add_data_connection(src_fb, src_output, dst_fb, dst_input)
+    def connect_data_pull(self, dst_fb: str, dst_event: str, src_fb: str, src_output: str, dst_input: str) -> None:
+        self._broker.add_data_pull(dst_fb, dst_event, src_fb, src_output, dst_input)
+
+    def connect_data_push(self, src_fb: str, src_event: str, src_output: str, dst_fb: str, dst_input: str) -> None:
+        self._broker.add_data_push(src_fb, src_event, src_output, dst_fb, dst_input)
 
     def set_data(self, fb_name: str, input_name: str, value) -> None:
         fb = self._container.get_fb(fb_name)

@@ -2,7 +2,6 @@ class BaseFB:
     def __init__(self, name: str):
         self.name = name
         
-
     def execute(self):
         raise NotImplementedError("Subclasses should implement this method.")
     

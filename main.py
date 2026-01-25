@@ -20,7 +20,6 @@ async def main() -> None:
     while True:
         current = adder.execute(current, 1)
         print(f"adder result: {current}")
-        await asyncio.sleep(0.5)
 
 
 if __name__ == "__main__":

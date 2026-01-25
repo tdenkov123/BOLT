@@ -7,19 +7,25 @@ from core.resource.BaseResource import BaseResource
 
 async def main() -> None:
     loader = FunctionBlockLoader()
-    fb_classes = loader.loadFBList(["core.FBs.ADD_2"])
+    fb_classes = loader.loadFBList(["core.FBs.ADD_2", "core.FBs.PRINT_CONSOLE"])
 
     dev = BaseDevice("dev1")
     res = BaseResource("res1")
     dev.add_resource(res)
 
-    adder = fb_classes["ADD_2"]("adder")
-    res.add_fb(adder)
+    res.add_fb(fb_classes["ADD_2"]("ADD_2"))
+    res.add_fb(fb_classes["PRINT_CONSOLE"]("PRINT_CONSOLE"))
 
-    current = 0
+    res.connect_data("ADD_2", "OUT", "ADD_2", "IN2")
+    res.connect_data("ADD_2", "OUT", "PRINT_CONSOLE", "IN")
+
+    res.set_data("ADD_2", "IN1", 1)
+    res.set_data("ADD_2", "IN2", 0)
+
     while True:
-        current = adder.execute(current, 1)
-        print(f"adder result: {current}")
+        await dev.trigger_event("res1", "ADD_2")
+        await dev.trigger_event("res1", "PRINT_CONSOLE")
+        await dev.run_event_cycle()
 
 
 if __name__ == "__main__":

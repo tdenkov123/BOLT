@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Any, Dict
 
 from core.FBContainer import FBContainer
 from core.EventBroker import EventBroker
@@ -23,12 +23,19 @@ class BaseResource:
     def add_fb(self, fb_instance) -> None:
         self._container.add_fb(fb_instance)
 
-    def connect(self, src_fb: str, src_event: str, dst_fb: str, dst_event: str = "REQ") -> None:
-        self._broker.add_connection(src_fb, src_event, dst_fb, dst_event)
+    def connect_event(self, src_fb: str, src_event: str, dst_fb: str, dst_event: str = "REQ") -> None:
+        self._broker.add_event_connection(src_fb, src_event, dst_fb, dst_event)
 
-    def enqueue_event(self, fb_name: str, payload: Iterable | None = None, event: str = "REQ") -> None:
-        self._broker.enqueue(fb_name, event, payload or [])
+    def connect_data(self, src_fb: str, src_output: str, dst_fb: str, dst_input: str) -> None:
+        self._broker.add_data_connection(src_fb, src_output, dst_fb, dst_input)
 
-    def drain_events(self) -> None:
-        self._broker.process_all()
+    def set_data(self, fb_name: str, input_name: str, value) -> None:
+        fb = self._container.get_fb(fb_name)
+        fb.set_input(input_name, value)
 
+    async def enqueue_event(self, fb_name: str, payload: Dict[str, Any] | None = None, event: str = "REQ") -> None:
+        payload_map = payload or {}
+        await self._broker.enqueue(fb_name, event, payload_map)
+
+    async def drain_events(self) -> None:
+        await self._broker.process_all()

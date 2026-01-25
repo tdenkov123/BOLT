@@ -25,10 +25,8 @@ async def main() -> None:
     res.set_data("ADD_2", "IN1", 1)
     res.set_data("ADD_2", "IN2", 0)
 
-    while True:
-        await dev.trigger_event("res1", "ADD_2") # to kickstart the chain, START block later
-        await dev.run_event_cycle()
-
+    await dev.trigger_event("res1", "ADD_2") # to kickstart the chain, START block later
+    await dev.run_event_cycle()
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,5 +1,5 @@
 from core.BaseFb import BaseFB
-import asyncio
+
 class PRINT_CONSOLE(BaseFB):
     def __init__(self, name: str):
         super().__init__(name)

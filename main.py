@@ -16,15 +16,17 @@ async def main() -> None:
     res.add_fb(fb_classes["ADD_2"]("ADD_2"))
     res.add_fb(fb_classes["PRINT_CONSOLE"]("PRINT_CONSOLE"))
 
-    res.connect_data("ADD_2", "OUT", "ADD_2", "IN2")
-    res.connect_data("ADD_2", "OUT", "PRINT_CONSOLE", "IN")
+    res.connect_data_push("ADD_2", "CNF", "OUT", "ADD_2", "IN2")
+    res.connect_data_push("ADD_2", "CNF", "OUT", "PRINT_CONSOLE", "IN")
+
+    res.connect_event("ADD_2", "CNF", "ADD_2", "REQ")
+    res.connect_event("ADD_2", "CNF", "PRINT_CONSOLE", "REQ")
 
     res.set_data("ADD_2", "IN1", 1)
     res.set_data("ADD_2", "IN2", 0)
 
     while True:
-        await dev.trigger_event("res1", "ADD_2")
-        await dev.trigger_event("res1", "PRINT_CONSOLE")
+        await dev.trigger_event("res1", "ADD_2") # to kickstart the chain, START block later
         await dev.run_event_cycle()
 
 

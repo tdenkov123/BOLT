@@ -11,7 +11,7 @@ class ADD_2(BaseFB):
             out_val = a + b
         except:
             out_val = 0
-        self._outputs = {"OUT": a + b}
+        self._outputs = {"OUT": out_val}
         return self._outputs
 
     def getEventOutputs(self):

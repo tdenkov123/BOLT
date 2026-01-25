@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable
+from typing import Dict
 
 from core.resource.BaseResource import BaseResource
 
@@ -19,17 +19,16 @@ class BaseDevice:
     def resources(self) -> Dict[str, BaseResource]:
         return self._resources
 
-    def trigger_event(self, resource_name: str, fb_name: str, payload: Iterable | None = None) -> None:
+    async def trigger_event(self, resource_name: str, fb_name: str, payload=None) -> None:
         resource = self._get_resource(resource_name)
-        resource.enqueue_event(fb_name, payload)
+        await resource.enqueue_event(fb_name, payload)
 
-    def run_event_cycle(self) -> None:
+    async def run_event_cycle(self) -> None:
         for resource in self._resources.values():
-            resource.drain_events()
+            await resource.drain_events()
 
     def _get_resource(self, resource_name: str) -> BaseResource:
         try:
             return self._resources[resource_name]
         except KeyError as exc:
             raise ValueError(f"Resource '{resource_name}' not found on device '{self.device_name}'.") from exc
-

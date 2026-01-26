@@ -19,13 +19,13 @@ class BaseDevice:
     def resources(self) -> Dict[str, BaseResource]:
         return self._resources
 
+    async def start(self) -> None:
+        for resource in self._resources.values():
+            await resource.start()
+
     async def trigger_event(self, resource_name: str, fb_name: str, payload=None) -> None:
         resource = self._get_resource(resource_name)
         await resource.enqueue_event(fb_name, payload)
-
-    async def run_event_cycle(self) -> None:
-        for resource in self._resources.values():
-            await resource.drain_events()
 
     def _get_resource(self, resource_name: str) -> BaseResource:
         try:

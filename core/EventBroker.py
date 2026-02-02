@@ -44,6 +44,9 @@ class EventBroker:
                 await self._runner
             except asyncio.CancelledError:
                 pass
+        for t in list(self._tasks):
+            t.cancel()
+        self._tasks.clear()
 
     async def _run(self) -> None:
         while True:

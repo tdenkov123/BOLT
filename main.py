@@ -32,8 +32,13 @@ async def main() -> None:
 
     await dev.trigger_event("res1", "START") # to kickstart the chain
 
-    while True:
-        await asyncio.sleep(0.1)
+    stop_event = asyncio.Event()
+    try:
+        await stop_event.wait()  # suspend forever until cancelled (Ctrl+C)
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        pass
+    finally:
+        await dev.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())

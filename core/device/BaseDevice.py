@@ -23,6 +23,10 @@ class BaseDevice:
         for resource in self._resources.values():
             await resource.start()
 
+    async def stop(self) -> None:
+        for resource in self._resources.values():
+            await resource.stop()
+
     async def trigger_event(self, resource_name: str, fb_name: str, payload=None) -> None:
         resource = self._get_resource(resource_name)
         await resource.enqueue_event(fb_name, payload)

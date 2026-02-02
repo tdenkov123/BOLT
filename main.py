@@ -34,7 +34,7 @@ async def main() -> None:
 
     stop_event = asyncio.Event()
     try:
-        await stop_event.wait()  # suspend forever until cancelled (Ctrl+C)
+        await stop_event.wait()
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
     finally:

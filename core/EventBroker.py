@@ -21,6 +21,7 @@ class EventBroker:
         self._data_connections: Dict[tuple[str, str], List[tuple[str, str]]] = {}
         self._queue: asyncio.Queue[_QueuedEvent] = asyncio.Queue()
         self._runner: asyncio.Task | None = None
+        self._tasks: set[asyncio.Task] = set()
 
     def add_event_connection(self, src_fb: str, src_event: str, dst_fb: str, dst_event: str) -> None:
         key = (src_fb, src_event)
@@ -51,7 +52,9 @@ class EventBroker:
     async def _run(self) -> None:
         while True:
             queued = await self._queue.get()
-            await self._handle_event(queued)
+            task = asyncio.create_task(self._handle_event(queued))
+            self._tasks.add(task)
+            task.add_done_callback(self._tasks.discard)
 
     async def _handle_event(self, queued: _QueuedEvent) -> None:
         fb = self._container.get_fb(queued.target_fb)

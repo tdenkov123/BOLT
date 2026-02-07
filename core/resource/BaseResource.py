@@ -22,6 +22,12 @@ class BaseResource:
 
     def add_fb(self, fb_instance) -> None:
         self._container.add_fb(fb_instance)
+        fb_instance.set_emit_callback(self._emit_event_callback)
+
+    async def _emit_event_callback(self, fb_name: str, event: str, payload: Dict[str, Any] | None) -> None:
+        connections = self._broker._event_connections.get((fb_name, event), [])
+        for dst_fb, dst_event in connections:
+            await self._broker.enqueue(dst_fb, dst_event, payload or {})
 
     def connect_event(self, src_fb: str, src_event: str, dst_fb: str, dst_event: str = "REQ") -> None:
         self._broker.add_event_connection(src_fb, src_event, dst_fb, dst_event)

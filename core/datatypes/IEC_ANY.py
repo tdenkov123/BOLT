@@ -57,3 +57,31 @@ class IEC_ANY:
 
     def __repr__(self) -> str:
         return f"{self.type_name()}({self._value!r})"
+
+
+class IEC_ANY_ELEMENTARY(IEC_ANY):
+    pass
+
+class IEC_ANY_MAGNITUDE(IEC_ANY_ELEMENTARY):
+    pass
+
+class IEC_ANY_NUM(IEC_ANY_MAGNITUDE):
+    pass
+
+class IEC_ANY_INT(IEC_ANY_NUM):
+    pass
+
+class IEC_ANY_REAL(IEC_ANY_NUM):
+    pass
+
+class IEC_ANY_STRING(IEC_ANY_ELEMENTARY):
+    pass
+
+class IEC_ANY_BIT(IEC_ANY_ELEMENTARY):
+    pass
+
+class IEC_ANY_DATE(IEC_ANY_ELEMENTARY):
+    pass
+
+class IEC_ANY_DURATION(IEC_ANY_MAGNITUDE):
+    pass

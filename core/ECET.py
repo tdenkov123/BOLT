@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import logging
 import threading
 from collections import deque
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from core.BaseFunctionBlock import BaseFunctionBlock
 
 from core.connections.Connection import ConnectionPoint
+logger = logging.getLogger(__name__)
 
 
 class EventChainExecutionThread:
@@ -58,7 +61,11 @@ class EventChainExecutionThread:
                 try:
                     event.fb.receive_input_event(event.port_id, self)
                 except Exception:
-                    print(f"Exception in FB '{event.fb.instance_name}' (event port {event.port_id})")
+                    logger.exception(
+                        "Exception in FB '%s' (event port %d)",
+                        event.fb.instance_name,
+                        event.port_id,
+                    )
             else:
                 self._processing_events = False
                 self._wake_event.clear()

@@ -2,15 +2,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Type
+from core.datatypes.iec_any import IEC_ANY
 
 @dataclass
 class FBInterface:
     ei_names: tuple[str, ...] = ()
     eo_names: tuple[str, ...] = ()
     di_names: tuple[str, ...] = ()
-    di_types: tuple[Type, ...] = ()
+    di_types: tuple[Type[IEC_ANY], ...] = ()
     do_names: tuple[str, ...] = ()
-    do_types: tuple[Type, ...] = ()
+    do_types: tuple[Type[IEC_ANY], ...] = ()
 
     def get_ei_id(self, name: str) -> int | None:
         try:

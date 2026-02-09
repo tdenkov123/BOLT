@@ -33,3 +33,20 @@ class FBInterface:
             return self.do_names.index(name)
         except ValueError:
             return None
+
+
+    @property
+    def num_eis(self) -> int:
+        return len(self.ei_names)
+
+    @property
+    def num_eos(self) -> int:
+        return len(self.eo_names)
+
+    @property
+    def num_dis(self) -> int:
+        return len(self.di_names)
+
+    @property
+    def num_dos(self) -> int:
+        return len(self.do_names)

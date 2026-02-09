@@ -7,20 +7,24 @@ from typing import Any
 class DataTypeIDEnum(IntEnum):
     ANY = 0
     BOOL = 1
-    SINT = 2
-    INT = 3
-    DINT = 4
-    LINT = 5
-    USINT = 6
-    UINT = 7
-    UDINT = 8
-    ULINT = 9
-    REAL = 10
-    LREAL = 11
-    STRING = 12
-    WSTRING = 13
-    TIME = 14
-    DATE = 15
+    BYTE = 2
+    WORD = 3
+    DWORD = 4
+    LWORD = 5
+    SINT = 6
+    INT = 7
+    DINT = 8
+    LINT = 9
+    USINT = 10
+    UINT = 11
+    UDINT = 12
+    ULINT = 13
+    REAL = 14
+    LREAL = 15
+    STRING = 16
+    WSTRING = 17
+    TIME = 18
+    DATE = 19
 
 
 class IEC_ANY:
@@ -81,7 +85,4 @@ class IEC_ANY_BIT(IEC_ANY_ELEMENTARY):
     pass
 
 class IEC_ANY_DATE(IEC_ANY_ELEMENTARY):
-    pass
-
-class IEC_ANY_DURATION(IEC_ANY_MAGNITUDE):
     pass

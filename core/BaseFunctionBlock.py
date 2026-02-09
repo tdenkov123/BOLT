@@ -9,6 +9,9 @@ class BaseFunctionBlock(ABC):
 
     def __init__(self, name: str):
         self._name = name
+        self._state = None
+        interface = self.INTERFACE
+
         self._inputs = {}
         self._outputs = {}
         self._emit_callback: Callable[[str, str, Dict[str, Any] | None], Awaitable[None]] | None = None
@@ -24,7 +27,7 @@ class BaseFunctionBlock(ABC):
 
     async def _emit_event(self, event: str, payload: Dict[str, Any] | None = None) -> None:
         if self._emit_callback:
-            await self._emit_callback(self.name, event, payload)
+            await self._emit_callback(self._name, event, payload)
 
     async def execute(self, event: str):
         raise NotImplementedError("Subclasses should implement this method.")

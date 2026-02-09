@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from core.BaseFunctionBlock import BaseFunctionBlock
 
 from core.connections.Connection import ConnectionPoint
+from core.FBStates import ManagerCommandType
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,6 +52,17 @@ class EventChainExecutionThread:
     @property
     def is_processing_events(self) -> bool:
         return self._processing_events
+
+    def change_execution_state(self, command: ManagerCommandType) -> None:
+        if command == ManagerCommandType.START:
+            self.start()
+        elif command == ManagerCommandType.STOP:
+            self.stop()
+        elif command == ManagerCommandType.KILL:
+            self._internal_queue.clear()
+            with self._external_lock:
+                self._external_queue.clear()
+            self.stop()
 
     def _run(self) -> None:
         while self._alive:

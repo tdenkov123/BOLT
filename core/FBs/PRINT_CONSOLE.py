@@ -1,6 +1,6 @@
-from core.BaseFb import BaseFB
+from core.BaseFunctionBlock import BaseFunctionBlock
 
-class PRINT_CONSOLE(BaseFB):
+class PRINT_CONSOLE(BaseFunctionBlock):
     def __init__(self, name: str):
         super().__init__(name)
 

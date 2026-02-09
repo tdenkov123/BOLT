@@ -1,7 +1,7 @@
 import asyncio
-from core.BaseFb import BaseFB
+from core.BaseFunctionBlock import BaseFunctionBlock
 
-class E_CYCLE(BaseFB):
+class E_CYCLE(BaseFunctionBlock):
     def __init__(self, name: str):
         super().__init__(name)
         self._cycle_task: asyncio.Task | None = None

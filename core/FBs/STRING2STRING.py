@@ -1,6 +1,6 @@
-from core.BaseFb import BaseFB
+from core.BaseFunctionBlock import BaseFunctionBlock
 
-class STR2STR(BaseFB):
+class STR2STR(BaseFunctionBlock):
     def __init__(self, name: str):
         super().__init__(name)
 

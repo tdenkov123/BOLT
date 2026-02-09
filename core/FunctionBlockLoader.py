@@ -1,15 +1,15 @@
 import importlib
 from typing import Dict, Iterable, List, Type
 
-from core.BaseFb import BaseFB
+from core.BaseFunctionBlock import BaseFunctionBlock
 
 
 class FunctionBlockLoader:
     def __init__(self) -> None:
         pass
 
-    def loadFBList(self, fbArray: List[str]) -> Dict[str, Type[BaseFB]]:
-        loaded_blocks: Dict[str, Type[BaseFB]] = {}
+    def loadFBList(self, fbArray: List[str]) -> Dict[str, Type[BaseFunctionBlock]]:
+        loaded_blocks: Dict[str, Type[BaseFunctionBlock]] = {}
         for fb_ref in fbArray:
             module_path, explicit_class = self._split_ref(fb_ref)
             try:
@@ -21,7 +21,7 @@ class FunctionBlockLoader:
 
             fb_classes = self._collect_classes(module, explicit_class)
             if not fb_classes:
-                target = explicit_class or "BaseFB subclass"
+                target = explicit_class or "BaseFunctionBlock subclass"
                 raise ImportError(
                     f"No {target} found in module '{module_path}'."
                 )
@@ -37,9 +37,9 @@ class FunctionBlockLoader:
             return module_path, class_name
         return fb_ref, None
 
-    def _collect_classes(self, module, explicit_class: str | None) -> Dict[str, Type[BaseFB]]:
+    def _collect_classes(self, module, explicit_class: str | None) -> Dict[str, Type[BaseFunctionBlock]]:
         def is_fb(candidate: object) -> bool:
-            return isinstance(candidate, type) and issubclass(candidate, BaseFB) and candidate is not BaseFB
+            return isinstance(candidate, type) and issubclass(candidate, BaseFunctionBlock) and candidate is not BaseFunctionBlock
 
         if explicit_class:
             try:
@@ -50,11 +50,11 @@ class FunctionBlockLoader:
                 ) from exc
             if not is_fb(fb_class):
                 raise ImportError(
-                    f"'{explicit_class}' in module '{module.__name__}' is not a BaseFB subclass."
+                    f"'{explicit_class}' in module '{module.__name__}' is not a BaseFunctionBlock subclass."
                 )
             return {explicit_class: fb_class}
 
-        discovered: Dict[str, Type[BaseFB]] = {}
+        discovered: Dict[str, Type[BaseFunctionBlock]] = {}
         for attr_name in dir(module):
             attr_val = getattr(module, attr_name)
             if is_fb(attr_val):

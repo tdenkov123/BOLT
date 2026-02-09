@@ -1,7 +1,8 @@
 from typing import Callable, Awaitable, Dict, Any
 
+from abc import ABC, abstractmethod
 
-class BaseFB:
+class BaseFunctionBlock(ABC):
     def __init__(self, name: str):
         self.name = name
         self._inputs = {}

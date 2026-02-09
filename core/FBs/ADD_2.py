@@ -1,6 +1,6 @@
-from core.BaseFb import BaseFB
+from core.BaseFunctionBlock import BaseFunctionBlock
 
-class ADD_2(BaseFB):
+class ADD_2(BaseFunctionBlock):
     def __init__(self, name: str):
         super().__init__(name)
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from core.datatypes.iec_any import IEC_ANY
+from core.datatypes.IEC_ANY import IEC_ANY
 
 if TYPE_CHECKING:
     from core.BaseFunctionBlock import BaseFunctionBlock

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Type
-from core.datatypes.iec_any import IEC_ANY
+from core.datatypes.IEC_ANY import IEC_ANY
 
 @dataclass
 class FBInterface:

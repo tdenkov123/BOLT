@@ -10,9 +10,9 @@ class FBContainer:
         self._blocks: Dict[str, BaseFunctionBlock] = {}
 
     def add_fb(self, fb: BaseFunctionBlock) -> None:
-        if fb.name in self._blocks:
-            raise ValueError(f"FB '{fb.name}' already exists in resource container.")
-        self._blocks[fb.name] = fb
+        if fb._name in self._blocks:
+            raise ValueError(f"FB '{fb._name}' already exists in resource container.")
+        self._blocks[fb._name] = fb
 
     def get_fb(self, name: str) -> BaseFunctionBlock:
         try:

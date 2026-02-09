@@ -1,10 +1,14 @@
 from typing import Callable, Awaitable, Dict, Any
-
 from abc import ABC, abstractmethod
 
+from core.FBInterface import FBInterface
+
 class BaseFunctionBlock(ABC):
+
+    INTERFACE: FBInterface
+
     def __init__(self, name: str):
-        self.name = name
+        self._name = name
         self._inputs = {}
         self._outputs = {}
         self._emit_callback: Callable[[str, str, Dict[str, Any] | None], Awaitable[None]] | None = None

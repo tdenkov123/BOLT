@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from core.BaseFunctionBlock import BaseFunctionBlock
 
 
-
 @dataclass
 class ConnectionPoint:
     fb: BaseFunctionBlock

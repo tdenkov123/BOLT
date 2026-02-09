@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Type, Any
 if TYPE_CHECKING:
     from core.BaseFunctionBlock import BaseFunctionBlock
 
+
 class DataConnection:
     def __init__(self, src_fb: BaseFunctionBlock, src_port_id: int, value: Any) -> None:
         self._src_fb = src_fb

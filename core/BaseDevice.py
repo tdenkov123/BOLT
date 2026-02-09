@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict
 
-from core.resource.BaseResource import BaseResource
+from core.BaseResource import BaseResource
 
 
 class BaseDevice:

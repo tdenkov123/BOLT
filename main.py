@@ -1,8 +1,8 @@
 import asyncio
 
 from core.FunctionBlockLoader import FunctionBlockLoader
-from core.device.BaseDevice import BaseDevice
-from core.resource.BaseResource import BaseResource
+from core.BaseDevice import BaseDevice
+from core.BaseResource import BaseResource
 
 
 async def main() -> None:

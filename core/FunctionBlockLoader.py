@@ -3,6 +3,7 @@ from typing import Dict, Iterable, List, Type
 
 from core.BaseFunctionBlock import BaseFunctionBlock
 
+EXTERNAL_EVENT_ID: int = 0xFFFE
 
 class FunctionBlockLoader:
     def __init__(self) -> None:

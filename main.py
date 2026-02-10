@@ -1,11 +1,12 @@
-import asyncio
+import signal
+import threading
 
 from core.FunctionBlockLoader import FunctionBlockLoader
 from core.BaseDevice import BaseDevice
 from core.BaseResource import BaseResource
 
 
-async def main() -> None:
+def main() -> None:
     loader = FunctionBlockLoader()
     start_class = loader.loadFBList(["core.FBs.START"])["START"]
     fb_classes = loader.loadFBList(["core.FBs.ADD_2", "core.FBs.PRINT_CONSOLE"])
@@ -14,9 +15,9 @@ async def main() -> None:
     res = BaseResource("res1")
     dev.add_resource(res)
 
-    res.add_fb(start_class("START"))
-    res.add_fb(fb_classes["ADD_2"]("ADD_2"))
-    res.add_fb(fb_classes["PRINT_CONSOLE"]("PRINT_CONSOLE"))
+    res.create_fb(start_class("START"))
+    res.create_fb(fb_classes["ADD_2"]("ADD_2"))
+    res.create_fb(fb_classes["PRINT_CONSOLE"]("PRINT_CONSOLE"))
 
     res.connect_data("ADD_2", "OUT", "ADD_2", "IN2")
     res.connect_data("ADD_2", "OUT", "PRINT_CONSOLE", "IN")
@@ -28,17 +29,19 @@ async def main() -> None:
     res.set_data("ADD_2", "IN1", 1)
     res.set_data("ADD_2", "IN2", 0)
 
-    await dev.start()
+    dev.start()
 
-    await dev.trigger_event("res1", "START") # to kickstart the chain
+    dev.trigger_event("res1", "START", event="START")
 
-    stop_event = asyncio.Event()
+    stop = threading.Event()
+    signal.signal(signal.SIGINT, lambda s, f: stop.set())
     try:
-        await stop_event.wait()
-    except (KeyboardInterrupt, asyncio.CancelledError):
+        stop.wait()
+    except KeyboardInterrupt:
         pass
     finally:
-        await dev.stop()
+        dev.stop()
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

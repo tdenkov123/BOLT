@@ -1,42 +1,68 @@
-import asyncio
-from core.BaseFb import BaseFB
+from __future__ import annotations
 
-class E_CYCLE(BaseFB):
-    def __init__(self, name: str):
-        super().__init__(name)
-        self._cycle_task: asyncio.Task | None = None
+import threading
+from typing import TYPE_CHECKING, Optional
 
-    async def execute(self, event: str):
-        if event == "START":
-            if self._cycle_task and not self._cycle_task.done():
-                self._cycle_task.cancel()
-                try:
-                    await self._cycle_task
-                except asyncio.CancelledError:
-                    pass
-            
-            dt = self._inputs.get("DT", 1000)
-            dt_seconds = dt / 1000.0
-            
-            self._cycle_task = asyncio.create_task(self._cycle(dt_seconds))
-            return {}, []
-            
-        elif event == "STOP":
-            if self._cycle_task and not self._cycle_task.done():
-                self._cycle_task.cancel()
-                try:
-                    await self._cycle_task
-                except asyncio.CancelledError:
-                    pass
-            self._cycle_task = None
-            return {}, []
-        
-        return {}, []
+from core.connections.Connection import ConnectionPoint
+from core.datatypes.IEC_TIME import IEC_TIME
+from core.BaseFunctionBlock import BaseFunctionBlock, EXTERNAL_EVENT_ID
+from core.interface_spec import SFBInterfaceSpec
 
-    async def _cycle(self, dt_seconds: float):
-        try:
-            while True:
-                await asyncio.sleep(dt_seconds)
-                await self._emit_event("EO")
-        except asyncio.CancelledError:
-            pass
+if TYPE_CHECKING:
+    from core.ECET import EventChainExecutionThread
+
+
+class E_CYCLE(BaseFunctionBlock):
+
+    FBINTERFACE = SFBInterfaceSpec(
+        ei_names=("START", "STOP"),
+        eo_names=("EO",),
+        di_names=("DT",),
+        di_types=(IEC_TIME,),
+    )
+
+    _EI_START = 0
+    _EI_STOP = 1
+    _EO_EO = 0
+    _DI_DT = 0
+
+    def __init__(self, instance_name: str) -> None:
+        self._timer: Optional[threading.Timer] = None
+        self._active = False
+        self._ecet: Optional[EventChainExecutionThread] = None
+        super().__init__(instance_name)
+
+    def execute_event(self, ei_id: int, ecet: EventChainExecutionThread) -> None:
+        if ei_id == self._EI_START:
+            self._stop_timer()
+            self._ecet = ecet
+            self._active = True
+            self._schedule_next()
+        elif ei_id == self._EI_STOP:
+            self._stop_timer()
+        elif ei_id == EXTERNAL_EVENT_ID:
+            self.send_output_event(self._EO_EO, ecet)
+
+    def _schedule_next(self) -> None:
+        dt_ms = self._di_vars[self._DI_DT].value
+        dt_seconds = max(dt_ms / 1000.0, 0.001)
+        self._timer = threading.Timer(dt_seconds, self._on_timer)
+        self._timer.daemon = True
+        self._timer.start()
+
+    def _on_timer(self) -> None:
+        if self._active and self._ecet is not None:
+            self._ecet.start_event_chain(
+                ConnectionPoint(self, EXTERNAL_EVENT_ID)
+            )
+        if self._active:
+            self._schedule_next()
+
+    def _stop_timer(self) -> None:
+        self._active = False
+        if self._timer is not None:
+            self._timer.cancel()
+            self._timer = None
+
+    def set_initial_values(self) -> None:
+        self._di_vars[self._DI_DT].value = 1000

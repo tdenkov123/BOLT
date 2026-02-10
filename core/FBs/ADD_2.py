@@ -1,17 +1,40 @@
-from core.BaseFb import BaseFB
+from __future__ import annotations
 
-class ADD_2(BaseFB):
-    def __init__(self, name: str):
-        super().__init__(name)
+from typing import TYPE_CHECKING
 
-    async def execute(self, event: str):
-        if event == "REQ":
-            a = self._inputs.get("IN1", 0)
-            b = self._inputs.get("IN2", 0)
-            try:
-                out_val = a + b
-            except:
-                out_val = 0
-            self._outputs = {"OUT": out_val}
-            return self._outputs, ["CNF"]
-        return {}, []
+from core.datatypes.IEC_INT import IEC_INT
+from core.BaseFunctionBlock import BaseFunctionBlock
+from core.FBInterface import FBInterface
+
+if TYPE_CHECKING:
+    from core.ECET import EventChainExecutionThread
+
+
+class ADD_2(BaseFunctionBlock):
+    
+    FBINTERFACE = FBInterface(
+        ei_names=("REQ",),
+        eo_names=("CNF",),
+        di_names=("IN1", "IN2"),
+        di_types=(IEC_INT, IEC_INT),
+        do_names=("OUT",),
+        do_types=(IEC_INT,),
+    )
+
+    _EI_REQ = 0
+    _EO_CNF = 0
+    _DI_IN1 = 0
+    _DI_IN2 = 1
+    _DO_OUT = 0
+
+    def execute_event(self, ei_id: int, ecet: EventChainExecutionThread) -> None:
+        if ei_id == self._EI_REQ:
+            in1 = self._di_vars[self._DI_IN1].value
+            in2 = self._di_vars[self._DI_IN2].value
+            self._do_vars[self._DO_OUT].value = in1 + in2
+            self.send_output_event(self._EO_CNF, ecet)
+
+    def set_initial_values(self) -> None:
+        self._di_vars[self._DI_IN1].value = 0
+        self._di_vars[self._DI_IN2].value = 0
+        self._do_vars[self._DO_OUT].value = 0

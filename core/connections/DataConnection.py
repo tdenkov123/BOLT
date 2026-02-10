@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from core.datatypes.IEC_ANY import IEC_ANY
+from core.datatypes.Cast import can_connect
 
 if TYPE_CHECKING:
     from core.BaseFunctionBlock import BaseFunctionBlock
@@ -21,4 +22,8 @@ class DataConnection:
     @property
     def value(self) -> IEC_ANY:
         return self._value
+
+    @staticmethod
+    def can_be_connected(src_type: Type[IEC_ANY], dst_type: Type[IEC_ANY]) -> bool:
+        return can_connect(src_type.type_id(), dst_type.type_id())
 

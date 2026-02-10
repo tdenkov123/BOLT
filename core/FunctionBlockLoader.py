@@ -1,9 +1,10 @@
 import importlib
-from typing import Dict, Iterable, List, Type
+from typing import Dict, List, Type
 
 from core.BaseFunctionBlock import BaseFunctionBlock
 
-EXTERNAL_EVENT_ID: int = 0xFFFE
+_BASE_CLASSES = frozenset({BaseFunctionBlock})
+
 
 class FunctionBlockLoader:
     def __init__(self) -> None:
@@ -38,9 +39,15 @@ class FunctionBlockLoader:
             return module_path, class_name
         return fb_ref, None
 
-    def _collect_classes(self, module, explicit_class: str | None) -> Dict[str, Type[BaseFunctionBlock]]:
+    def _collect_classes(
+        self, module, explicit_class: str | None
+    ) -> Dict[str, Type[BaseFunctionBlock]]:
         def is_fb(candidate: object) -> bool:
-            return isinstance(candidate, type) and issubclass(candidate, BaseFunctionBlock) and candidate is not BaseFunctionBlock
+            return (
+                isinstance(candidate, type)
+                and issubclass(candidate, BaseFunctionBlock)
+                and candidate not in _BASE_CLASSES
+            )
 
         if explicit_class:
             try:

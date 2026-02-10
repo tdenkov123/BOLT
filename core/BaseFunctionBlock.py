@@ -12,6 +12,8 @@ from core.FBInterface import FBInterface
 if TYPE_CHECKING:
     from core.ECET import EventChainExecutionThread
 
+EXTERNAL_EVENT_ID: int = 0xFFFE
+
 class BaseFunctionBlock(ABC):
     FBINTERFACE: FBInterface
 

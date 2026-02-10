@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from core.datatypes.IEC_ANY import DataTypeIDEnum, IEC_ANY_BIT
+from core.datatypes.IEC_Literals import parse_iec_bool_literal, parse_iec_int_literal
 
 
 def _coerce_any_bit(value, byte_len: int, type_name: str) -> bytes:
@@ -14,13 +15,10 @@ def _coerce_any_bit(value, byte_len: int, type_name: str) -> bytes:
         return b
 
     if isinstance(value, str):
-        s = value.strip().lower()
-        if s.startswith("0x"):
-            s = s[2:]
         try:
-            value = int(s, 16)
+            value = parse_iec_int_literal(value)
         except ValueError as exc:
-            raise ValueError(f"Invalid hex string for {type_name}") from exc
+            raise ValueError(f"Invalid integer literal for {type_name}") from exc
 
     if isinstance(value, int):
         max_value = (1 << (byte_len * 8)) - 1
@@ -42,6 +40,8 @@ class IEC_BOOL(IEC_ANY_BIT):
         return False
 
     def _coerce(self, value) -> bool:
+        if isinstance(value, str):
+            return parse_iec_bool_literal(value)
         return bool(value)
 
 

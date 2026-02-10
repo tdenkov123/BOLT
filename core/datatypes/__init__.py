@@ -29,6 +29,7 @@ from core.datatypes.IEC_INT import (
 )
 from core.datatypes.IEC_REAL import IEC_LREAL, IEC_REAL
 from core.datatypes.IEC_STRING import IEC_STRING, IEC_WSTRING
+from core.datatypes.IEC_DATE import IEC_DATE
 from core.datatypes.IEC_TIME import IEC_TIME
 
 __all__ = [
@@ -55,6 +56,7 @@ __all__ = [
     "IEC_SINT",
     "IEC_STRING",
     "IEC_TIME",
+    "IEC_DATE",
     "IEC_UDINT",
     "IEC_UINT",
     "IEC_ULINT",

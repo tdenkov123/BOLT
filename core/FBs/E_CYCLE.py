@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from core.connections.Connection import ConnectionPoint
 from core.datatypes.IEC_TIME import IEC_TIME
 from core.BaseFunctionBlock import BaseFunctionBlock, EXTERNAL_EVENT_ID
-from core.interface_spec import SFBInterfaceSpec
+from core.FBInterface import SFBInterfaceSpec
 
 if TYPE_CHECKING:
     from core.ECET import EventChainExecutionThread

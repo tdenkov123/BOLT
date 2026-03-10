@@ -12,7 +12,7 @@ else
 fi
 
 if [ ! -d "$VENV_DIR" ]; then
-    echo "[INFO] Creating virtual environment in $VENV_DIR ..."
+    echo "[INFO] Creating virtual environment in $VENV_DIR..."
     $PYTHON_BIN -m venv "$VENV_DIR"
 else
     echo "[INFO] Virtual environment already exists at $VENV_DIR."
@@ -23,9 +23,9 @@ echo "[INFO] Virtual environment activated."
 
 pip install --upgrade pip
 
-if [ -f "requirements.txt" ]; then
+if [ -f "../requirements.txt" ]; then
     echo "[INFO] Installing dependencies"
-    pip install -r requirements.txt
+    pip install -r ../requirements.txt
 else
     echo "[WARN] No requirements.txt found, skipping."
 fi

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from core.connections.Connection import ConnectionPoint
 from core.datatypes.IEC_TIME import IEC_TIME
 from core.BaseFunctionBlock import BaseFunctionBlock, EXTERNAL_EVENT_ID
-from core.FBInterface import SFBInterfaceSpec
+from core.FBInterface import FBInterface
 
 if TYPE_CHECKING:
     from core.ECET import EventChainExecutionThread
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class E_CYCLE(BaseFunctionBlock):
 
-    FBINTERFACE = SFBInterfaceSpec(
+    FBINTERFACE = FBInterface(
         ei_names=("START", "STOP"),
         eo_names=("EO",),
         di_names=("DT",),

@@ -3,7 +3,7 @@
 set -e
 
 PORT="/dev/ttyACM0"
-SRC_DIR="$(dirname "$0")/BOLT_mp/BOLT_mp"
+SRC_DIR="$(dirname "$0")/../BOLT_mp/BOLT_mp"
 
 echo "[INFO] Deploying to $PORT from $SRC_DIR ..."
 

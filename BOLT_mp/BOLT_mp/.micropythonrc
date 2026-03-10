@@ -1,11 +1,11 @@
 {
   "upload": {
     "port": "/dev/ttyACM0",
-    "baud": 115200
+    "baud": 460800
   },
   "serial": {
     "port": "/dev/ttyACM0",
-    "baud": 115200
+    "baud": 460800
   },
   "ignore": {
     "extensions": [
@@ -16,7 +16,7 @@
     ]
   },
   "tools": {
-    "ampy": "/home/tdenkov/.local/bin/rshell",
-    "rshell": ""
+    "ampy": "/home/tdenkov/.local/bin/ampy",
+    "rshell": "/home/tdenkov/.local/bin/rshell"
   }
 }

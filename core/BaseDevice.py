@@ -33,12 +33,10 @@ class BaseDevice:
         return self._resources
 
     def start(self) -> None:
-        """Start all resources (each starts its own ECET thread)."""
         for resource in self._resources.values():
             resource.start()
 
     def stop(self) -> None:
-        """Stop all resources."""
         for resource in self._resources.values():
             resource.stop()
 

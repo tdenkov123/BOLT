@@ -127,7 +127,6 @@ class BaseResource(BaseFunctionBlock):
     def ecet(self) -> EventChainExecutionThread:
         return self._ecet
 
-    # Basefb overrides (no logic)
     def execute_event(self, ei_id, ecet):
         pass
 

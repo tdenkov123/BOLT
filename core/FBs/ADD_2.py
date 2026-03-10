@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core.datatypes.IEC_INT import IEC_INT
+from core.datatypes.IEC_INT import IEC_LINT
+from core.datatypes.IEC_REAL import IEC_LREAL
+from core.datatypes.IEC_ANY import IEC_ANY_NUM
 from core.BaseFunctionBlock import BaseFunctionBlock
 from core.FBInterface import FBInterface
 
@@ -16,9 +18,9 @@ class ADD_2(BaseFunctionBlock):
         ei_names=("REQ",),
         eo_names=("CNF",),
         di_names=("IN1", "IN2"),
-        di_types=(IEC_INT, IEC_INT),
+        di_types=(IEC_ANY_NUM, IEC_ANY_NUM),
         do_names=("OUT",),
-        do_types=(IEC_INT,),
+        do_types=(IEC_LREAL,),
     )
 
     _EI_REQ = 0

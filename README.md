@@ -59,13 +59,24 @@ BROKER_HOST = "localhost"   # or your broker's IP
 BROKER_PORT = 1883
 ```
 
-### 3. Start the MQTT broker
+### 3. Start the MQTT broker with auto-discovery
+
+To enable ESP32 devices to auto-discover the broker via mDNS on the local network, run:
+
+```bash
+./setup.sh
+```
+
+This script:
+- Installs `avahi-daemon` if needed (required for mDNS on Linux)
+- Registers the broker as a discoverable service (`mqtt.local`)
+- Starts the Docker Compose broker
+
+**Alternatively**, start manually without auto-discovery:
 
 ```bash
 docker compose up -d
 ```
-
-This starts an Eclipse Mosquitto broker on port `1883` (MQTT) and `9001` (WebSocket).
 
 ### 4. Run BOLT
 
@@ -82,15 +93,30 @@ As the example, BOLT connects to the broker, starts the cyclic engine, and begin
 ## ESP32 / MicroPython setup
 
 ### 1. Configure the device
-Edit configurations in `BOLT_mp/config.py`
 
+Edit configurations in `BOLT_mp/BOLT_mp/config.py`:
+
+```python
+WIFI_SSID           = "your-wifi-ssid"
+WIFI_PASSWORD       = "your-wifi-password"
+
+# Enable auto-discovery of the broker via mDNS
+BROKER_DISCOVERY_ENABLED = True
+BROKER_MDNS_NAME = "mqtt"          # resolves as mqtt.local via mDNS
+BROKER_DISCOVERY_TIMEOUT_MS = 3000 # ms to wait for each mDNS query attempt
+BROKER_DISCOVERY_RETRIES = 3       # attempts before falling back
+
+# Fallback if discovery fails or is disabled
+BROKER_HOST         = "192.168.x.x"   # fallback IP if discovery is disabled or fails
+BROKER_PORT         = 1883
+CLIENT_ID           = "esp32-engine-01"
 ```
-WIFI_SSID     = "your-wifi-ssid"
-WIFI_PASSWORD = "your-wifi-password"
-BROKER_HOST   = "192.168.x.x"   # IP of the machine running the broker
-BROKER_PORT   = 1883
-CLIENT_ID     = "esp32-engine-01"
-```
+
+**Auto-discovery notes:**
+- The broker must be running on a machine with mDNS support (Linux with `avahi-daemon`)
+- Use `./setup.sh` to start the broker with mDNS advertised
+- If `BROKER_DISCOVERY_ENABLED = False`, the ESP32 will connect directly to `BROKER_HOST`
+- If discovery fails, the device automatically falls back to the hardcoded `BROKER_HOST`
 
 And in `BOLT_mp/.micropythonrc`
 

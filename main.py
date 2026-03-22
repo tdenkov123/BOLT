@@ -62,6 +62,7 @@ def main() -> None:
     classes = loader.loadFBList([
         "core.FBs.START",
         "core.FBs.E_CYCLE",
+        "core.FBs.E_DELAY",
         "core.FBs.PRINT_CONSOLE",
         "core.FBs.MQTT_PUBLISH",
         "core.FBs.MQTT_SUBSCRIBE",

@@ -98,7 +98,7 @@ def main() -> None:
     res.set_data(
         "PRINT_CONN",
         "IN",
-        "[BOLT] MQTT initialized (CONNACK ok). TX lines appear only after a successful PUB.SEND.",
+        "[BOLT] MQTT initialized (CONNACK ok).",
     )
 
     res.connect_event("START", "START", "PUB",   "INIT")
@@ -106,7 +106,6 @@ def main() -> None:
     res.connect_event("START", "START", "CYCLE", "START")
     res.connect_event("PUB", "INITO", "PRINT_CONN", "REQ")
     res.connect_event("CYCLE",   "EO",    "COUNTER",  "REQ")
-    # TX log only after MQTT_PUBLISH.SEND succeeds (misleading if chained from COUNTER alone).
     res.connect_event("COUNTER", "CNF",   "PUB",      "SEND")
     res.connect_event("PUB",     "CNF",   "PRINT_TX", "REQ")
     res.connect_event("SUB", "IND", "PRINT", "REQ")

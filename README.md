@@ -17,9 +17,15 @@ BOLT/
 ├── config.py           # Host-side configuration (broker host/port)
 ├── main.py             # Example application
 ├── requirements.txt    # Python dependencies
-├── scripts/
-│   ├── setup_venv.sh       # Venv creation + dependency installation script
-│   └── deploy_mp_script.sh # Upload MicroPython firmware to the ESP32
+├── scripts/            # Operational helpers only
+│   ├── setup_venv.sh       # Venv creation + dependency installation
+│   ├── deploy_mp_script.sh # Upload MicroPython firmware to the ESP32
+│   └── mp_debug_esp.sh     # Runs tests/mp_debug_esp_device.py via mpremote
+├── tests/              # MQTT / ESP integration probes (run from repo root with venv)
+│   ├── mqtt_roundtrip_smoke.py   # Broker smoke test without an ESP32
+│   ├── mqtt_engine_watch.py      # Log ENGINE_* topics to the terminal
+│   ├── esp32_mqtt_stability_probe.py  # Long-run PC↔ESP stability (BOLT FBs + real ESP ACKs)
+│   └── mp_debug_esp_device.py    # MicroPython one-shot network/broker sanity (ESP only)
 ```
 
 ---
@@ -86,6 +92,8 @@ python main.py
 
 As the example, BOLT connects to the broker, starts the cyclic engine, and begins publishing `ENGINE_DEGREES` every 500 ms while listening for `ENGINE_STATUS` acknowledgements.
 
+Lines printed as `[TX] ... published` only appear after `MQTT_PUBLISH` reports success for that send (QoS 0: accepted by the client library / handed to the TCP stack), so you should **not** see them if the broker is down and `INIT` never completed. To verify the broker path end-to-end without the ESP32: `.venv/bin/python tests/mqtt_roundtrip_smoke.py` (optional: `--broker-host HOST --broker-port 1883`; with `docker compose up -d`).
+
 > **Performance tip:** BOLT uses one thread per event chain. For maximum throughput on CPython, disable the GIL (Python 3.13+ free-threaded build).
 
 ---
@@ -100,23 +108,42 @@ Edit configurations in `BOLT_mp/BOLT_mp/config.py`:
 WIFI_SSID           = "your-wifi-ssid"
 WIFI_PASSWORD       = "your-wifi-password"
 
-# Enable auto-discovery of the broker via mDNS
+# After Wi-Fi connects, run discovery once (fast IP probe + optional mDNS)
 BROKER_DISCOVERY_ENABLED = True
-BROKER_MDNS_NAME = "mqtt"          # resolves as mqtt.local via mDNS
-BROKER_DISCOVERY_TIMEOUT_MS = 3000 # ms to wait for each mDNS query attempt
-BROKER_DISCOVERY_RETRIES = 3       # attempts before falling back
+# Keep False on ESP32-C6 unless you have verified _thread + lwIP + USB (avoids Guru Meditation / raw REPL issues).
+BROKER_DISCOVERY_USE_THREAD = False
+# Dangerous on ESP32 lwIP: socket.getaddrinfo("*.local") can block and break mpremote.
+BROKER_MDNS_LOOKUP_ENABLED = False
+BROKER_MDNS_NAME = "mqtt"          # only used when BROKER_MDNS_LOOKUP_ENABLED is True
+BROKER_DISCOVERY_TIMEOUT_MS = 3000 # TCP probe timeout cap (and pacing hint)
+BROKER_DISCOVERY_RETRIES = 3       # mDNS resolve rounds (only when mDNS lookup enabled)
 
-# Fallback if discovery fails or is disabled
-BROKER_HOST         = "192.168.x.x"   # fallback IP if discovery is disabled or fails
+# Broker LAN IP — used when discovery is off, as the fast path when it answers, and as fallback
+BROKER_HOST         = "192.168.x.x"
 BROKER_PORT         = 1883
 CLIENT_ID           = "esp32-engine-01"
+
+# `main.py` waits up to this many ms for async discovery (see `bolt_net.await_discovery`).
+BROKER_DISCOVERY_WAIT_MS = 15000
 ```
 
-**Auto-discovery notes:**
-- The broker must be running on a machine with mDNS support (Linux with `avahi-daemon`)
-- Use `./setup.sh` to start the broker with mDNS advertised
-- If `BROKER_DISCOVERY_ENABLED = False`, the ESP32 will connect directly to `BROKER_HOST`
-- If discovery fails, the device automatically falls back to the hardcoded `BROKER_HOST`
+**Broker resolution notes:**
+- `boot.py` calls `bolt_net.init()`: Wi‑Fi, baseline `RESOLVED_*` = `BROKER_*`. When discovery is on, either **`BROKER_DISCOVERY_USE_THREAD`** starts **`discover_broker()`** in **`_thread`**, or (default) discovery is **deferred** to **`main.py`**’s **`bolt_net.await_discovery()`** on the **main** task.
+- Threaded mode: **`await_discovery()`** polls with **`sleep_ms`** until the worker finishes or **`BROKER_DISCOVERY_WAIT_MS`** elapses.
+- Default (no thread): **`await_discovery()`** runs **`discover_broker()`** once on the main task (still may block on long `getaddrinfo` if mDNS lookup is enabled).
+- **`mdns_discovery`**: fast IP probe, optional `*.local` when `BROKER_MDNS_LOOKUP_ENABLED`, retries, fallback.
+- If `BROKER_DISCOVERY_ENABLED = False`, the ESP uses `BROKER_HOST`/`BROKER_PORT` only.
+
+**Finding the correct broker IP on your LAN**
+
+The ESP talks to **`BROKER_HOST` over Wi‑Fi**, not to `localhost`. If Mosquitto runs in Docker on your laptop, **`BROKER_HOST` must be that laptop’s LAN address** (e.g. `192.168.1.x`), the same subnet as the ESP (check the ESP serial line: `wlan.ifconfig()` / `Wi-Fi connected: ('192.168.x.y', …)`).
+
+1. **On the PC that runs Mosquitto / Docker:**  
+   Linux: `ip -4 route get 1.1.1.1 | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}'` or `hostname -I` (pick the Wi‑Fi or Ethernet IPv4).  
+   Windows / macOS: `ipconfig` / System Settings → network — IPv4 for the adapter on that LAN.
+2. **Sanity check from any device on the same LAN:**  
+   `nc -vz THAT_IP 1883` or `mqtt pub -h THAT_IP …` — must succeed when Docker maps `1883:1883` and `listener 1883 0.0.0.0` is set.
+3. **If the PC’s LAN IP changes (DHCP):** use a DHCP reservation in the router, or keep discovery + a stable `BROKER_HOST` probe list, or enable mDNS only if your network resolves `mqtt.local` reliably.
 
 And in `BOLT_mp/.micropythonrc`
 
@@ -154,7 +181,7 @@ Connect the ESP32 via USB, then run:
 bash scripts/deploy_mp_script.sh
 ```
 
-This copies `boot.py`, `main.py`, `mqtt_client.py`, and `config.py` to the device and resets it. The default port is `/dev/ttyACM0` — edit the `PORT` variable in the script if yours differs.
+This copies `boot.py`, `main.py`, `mqtt_client.py`, `bolt_net.py`, `mdns_discovery.py`, and `config.py` to the device, removes a stale onboard `agent_debug_mp.py` if present, and resets. The default port is `/dev/ttyACM0` — override with `PORT=/dev/ttyUSB0 bash scripts/deploy_mp_script.sh` if needed.
 
 ---
 

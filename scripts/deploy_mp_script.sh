@@ -7,6 +7,8 @@ SRC_DIR="$(dirname "$0")/../BOLT_mp/BOLT_mp"
 
 echo "[INFO] Deploying to $PORT from $SRC_DIR ..."
 
+mpremote connect "$PORT" soft-reset >/dev/null 2>&1 || true
+mpremote connect "$PORT" soft-reset >/dev/null 2>&1 || true
 mpremote connect "$PORT" cp "$SRC_DIR/config.py" :config.py
 mpremote connect "$PORT" cp "$SRC_DIR/bolt_net.py" :bolt_net.py
 mpremote connect "$PORT" cp "$SRC_DIR/boot.py" :boot.py

@@ -43,14 +43,21 @@ class COUNTER_360(BaseFunctionBlock):
 class PRINT_TX(PRINT_CONSOLE):
     def execute_event(self, ei_id: int, ecet: "EventChainExecutionThread") -> None:
         if ei_id == self._EI_REQ:
-            print("[TX] ENGINE_DEGREES =", self._di_vars[self._DI_IN].value)
+            print(
+                "[TX] ENGINE_DEGREES published:",
+                self._di_vars[self._DI_IN].value,
+                "(queued to broker; QoS 0)",
+            )
             self.send_output_event(self._EO_CNF, ecet)
 
 
 class PRINT_RX(PRINT_CONSOLE):
     def execute_event(self, ei_id: int, ecet: "EventChainExecutionThread") -> None:
         if ei_id == self._EI_REQ:
-            print("[RX] ENGINE_STATUS  =", self._di_vars[self._DI_IN].value)
+            print(
+                "[RX] ENGINE_STATUS received:",
+                self._di_vars[self._DI_IN].value,
+            )
             self.send_output_event(self._EO_CNF, ecet)
 
 
@@ -88,20 +95,25 @@ def main() -> None:
     res.set_data("SUB", "BROKER_HOST", BROKER_HOST)
     res.set_data("SUB", "BROKER_PORT", BROKER_PORT)
     res.set_data("SUB", "TOPIC", "ENGINE_STATUS")
-    res.set_data("PRINT_CONN", "IN", "[BOLT] MQTT broker connected")
+    res.set_data(
+        "PRINT_CONN",
+        "IN",
+        "[BOLT] MQTT initialized (CONNACK ok). TX lines appear only after a successful PUB.SEND.",
+    )
 
     res.connect_event("START", "START", "PUB",   "INIT")
     res.connect_event("START", "START", "SUB",   "INIT")
     res.connect_event("START", "START", "CYCLE", "START")
     res.connect_event("PUB", "INITO", "PRINT_CONN", "REQ")
     res.connect_event("CYCLE",   "EO",    "COUNTER",  "REQ")
-    res.connect_event("COUNTER", "CNF",   "PRINT_TX", "REQ")
+    # TX log only after MQTT_PUBLISH.SEND succeeds (misleading if chained from COUNTER alone).
     res.connect_event("COUNTER", "CNF",   "PUB",      "SEND")
+    res.connect_event("PUB",     "CNF",   "PRINT_TX", "REQ")
     res.connect_event("SUB", "IND", "PRINT", "REQ")
 
-    res.connect_data("COUNTER", "VALUE", "PUB",   "VALUE")
-    res.connect_data("SUB", "VALUE", "PRINT", "IN")
+    res.connect_data("COUNTER", "VALUE", "PUB",      "VALUE")
     res.connect_data("COUNTER", "VALUE", "PRINT_TX", "IN")
+    res.connect_data("SUB",      "VALUE", "PRINT",    "IN")
 
     print(f"[BOLT] Connecting to broker at {BROKER_HOST}:{BROKER_PORT} ...")
     dev.start()

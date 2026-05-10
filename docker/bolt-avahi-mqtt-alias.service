@@ -1,0 +1,21 @@
+# Install: run ./setup.sh (copies this unit + bolt-avahi-mqtt-alias.sh), or manually:
+#
+#   sudo install -m 755 docker/bolt-avahi-mqtt-alias.sh /usr/local/sbin/bolt-avahi-mqtt-alias
+#   sudo cp docker/bolt-avahi-mqtt-alias.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now bolt-avahi-mqtt-alias.service
+
+[Unit]
+Description=BOLT MQTT mDNS alias (mqtt.local)
+After=network-online.target avahi-daemon.service
+Wants=network-online.target avahi-daemon.service
+
+[Service]
+Type=simple
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/local/sbin/bolt-avahi-mqtt-alias
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -5,7 +5,7 @@ from config import CLIENT_ID
 import bolt_net
 
 bolt_net.init()
-from bolt_net import RESOLVED_BROKER_HOST, RESOLVED_BROKER_PORT
+bolt_net.await_discovery()
 
 
 def set_engine_angle(degrees):
@@ -25,15 +25,15 @@ def on_engine_degrees(value):
     print("[ESP->BOLT] published ENGINE_STATUS", "ACK:" + str(angle))
 
 
-client = BoltMQTTClient(CLIENT_ID, RESOLVED_BROKER_HOST, RESOLVED_BROKER_PORT)
+client = BoltMQTTClient(CLIENT_ID, bolt_net.RESOLVED_BROKER_HOST, bolt_net.RESOLVED_BROKER_PORT)
 client.connect()
 client.subscribe("ENGINE_DEGREES", on_engine_degrees)
 
 print(
     "[ESP] MQTT subscribed on",
-    RESOLVED_BROKER_HOST,
+    bolt_net.RESOLVED_BROKER_HOST,
     ":",
-    RESOLVED_BROKER_PORT,
+    bolt_net.RESOLVED_BROKER_PORT,
     "topics: ENGINE_DEGREES → ENGINE_STATUS ACK (client id",
     CLIENT_ID,
     ")",

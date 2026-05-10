@@ -34,13 +34,44 @@ class BoltMQTTClient:
             self._client.subscribe(topic.encode())
 
     def connect(self):
+        """Initial TCP+MQTT handshake; retries on errno 113/EHOSTUNREACH etc. Transient lwIP resets are common."""
+        max_attempts = 15
+        delay_ms = 250
         print("[MQTT] Connecting to", self._broker_host, "port", self._broker_port, "...")
-        self._client.connect()
-        self._connected = True
-        self._backoff_ms = 1000
-        self._next_try_tick = 0
-        print("[MQTT] Connected")
-        self._resubscribe_all()
+        for attempt in range(1, max_attempts + 1):
+            try:
+                self._client.connect()
+                self._connected = True
+                self._backoff_ms = 1000
+                self._next_try_tick = 0
+                if attempt > 1:
+                    print("[MQTT] Connected on attempt", attempt)
+                else:
+                    print("[MQTT] Connected")
+                self._resubscribe_all()
+                return
+            except OSError as e:
+                errno = e.args[0] if e.args else None
+                print(
+                    "[MQTT] connect attempt",
+                    attempt,
+                    "/",
+                    max_attempts,
+                    "failed:",
+                    repr(e),
+                    "errno=",
+                    errno,
+                )
+                if attempt >= max_attempts:
+                    print(
+                        "[MQTT] giving up;",
+                        self._broker_host + ":" + str(self._broker_port),
+                        "— broker down, wrong IP, or firewall?",
+                        "(host: Docker listener 1883 bind 0.0.0.0, LAN route OK)",
+                    )
+                    raise
+                time.sleep_ms(delay_ms)
+                delay_ms = min(delay_ms * 2, 4000)
 
     def subscribe(self, topic, callback):
         self._callbacks[topic] = callback

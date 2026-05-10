@@ -2,10 +2,14 @@ WIFI_SSID = "YOUR_WIFI_SSID"
 WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 
 BROKER_DISCOVERY_ENABLED = True
-BROKER_MDNS_NAME = "mqtt"          # resolves as mqtt.local via mDNS
-BROKER_DISCOVERY_TIMEOUT_MS = 3000 # ms to wait for each mDNS query attempt
-BROKER_DISCOVERY_RETRIES = 3       # attempts before falling back
+BROKER_MDNS_LOOKUP_ENABLED = False
 
-BROKER_HOST = "192.168.1.19"       # fallback IP if discovery is disabled or fails
+BROKER_MDNS_NAME = "mqtt"        # tries mqtt.local (see setup host alias notes)
+BROKER_EXTRA_HOSTS_TO_TRY = ()   # extra names
+
+BROKER_DISCOVERY_TIMEOUT_MS = 3000  # probe budget hint (retries pacing)
+BROKER_DISCOVERY_RETRIES = 3
+
+BROKER_HOST = "192.168.1.19"
 BROKER_PORT = 1883
 CLIENT_ID = "esp32-engine-01"

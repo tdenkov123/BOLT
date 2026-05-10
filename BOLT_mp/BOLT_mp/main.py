@@ -2,7 +2,10 @@ import time
 from mqtt_client import BoltMQTTClient
 
 from config import CLIENT_ID
-from boot import RESOLVED_BROKER_HOST, RESOLVED_BROKER_PORT
+import bolt_net
+
+bolt_net.init()
+from bolt_net import RESOLVED_BROKER_HOST, RESOLVED_BROKER_PORT
 
 
 def set_engine_angle(degrees):
@@ -19,13 +22,23 @@ def on_engine_degrees(value):
     set_engine_angle(angle)
 
     client.publish("ENGINE_STATUS", "ACK:" + str(angle))
+    print("[ESP->BOLT] published ENGINE_STATUS", "ACK:" + str(angle))
 
 
 client = BoltMQTTClient(CLIENT_ID, RESOLVED_BROKER_HOST, RESOLVED_BROKER_PORT)
 client.connect()
 client.subscribe("ENGINE_DEGREES", on_engine_degrees)
 
-print("Connected to broker, listening for ENGINE_DEGREES ...")
+print(
+    "[ESP] MQTT subscribed on",
+    RESOLVED_BROKER_HOST,
+    ":",
+    RESOLVED_BROKER_PORT,
+    "topics: ENGINE_DEGREES → ENGINE_STATUS ACK (client id",
+    CLIENT_ID,
+    ")",
+)
+print("[ESP] If BOLT sees no [RX], check this USB serial log — no lines here ⇒ ESP not receiving.")
 
 _heartbeat = 0
 while True:
